@@ -1,0 +1,106 @@
+html {
+ background-color: #9CF;
+}
+
+body {
+	width: 700px;
+	height: 100%;
+	margin: auto;
+	margin-top: 0px;
+	background-color: #FFF;
+	padding: 0px;
+}
+
+#navigation {
+	padding-top: 30px;
+	margin-bottom: 15px;
+}
+
+#navigation a {
+	font-family: Verdana, sans-serif;
+	text-decoration: none;
+	color: #000;
+	font-weight: bold;
+	font-size: 120%;
+	margin: 10px 20px 10px 20px;
+}
+
+#mededelingContent {
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+#mededelingForm {
+	text-align: right;
+}
+
+#mededeling {
+	display: inline;
+	width: 450px;
+	height: 150px;
+}
+
+#timesContent {
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+.bigButton {
+	background: #E3E3E3;
+	border: 1px solid #BBB;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	/*-webkit-box-shadow: inset 0 0 1px 1px #f6f6f6;
+	-moz-box-shadow: inset 0 0 1px 1px #f6f6f6;
+	box-shadow: inset 0 0 1px 1px #f6f6f6;*/
+	-webkit-box-shadow: inset 0 0 1px 1px #055;
+	-moz-box-shadow: inset 0 0 1px 1px #055;
+	box-shadow: inset 0 0 1px 1px #055;
+	color: #333;
+	font: bold 20px Verdana, sans-serif;
+	line-height: 1;
+	padding: 8px 0 9px;
+	text-align: center;
+	text-shadow: 0 1px 0 white;
+	width: 200px;
+	height: 93px;
+	margin: 0 0 3px 0px;
+	float: left;
+	/*display: block;*/
+}
+
+.bigButton:hover {
+	background: #EAEAEA;
+}
+
+#canvasContainer
+{
+	margin: 0 auto;
+	padding: 0 0 0 0;
+	width: 480px;
+}
+
+#canvas
+{
+	position: absolute;
+	border: 1px solid #000;
+	float: left;
+}
+
+#imageTemp
+{
+	/*position:absolute;
+	width: 480px;
+	top: 10px;
+	margin: 0 0 0 0;*/
+	position: absolute;
+	width: 480px;
+	float: left;
+	z-index: -1;
+}
+
+#options
+{
+	float: left;
+}
