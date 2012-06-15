@@ -16,7 +16,6 @@
 ************* MySQL Database Settings ******************
 *******************************************************/
 
-
 define("DB_NAME", "ASRO");				// db name
 define("DB_USER", "test_user");				// db username
 define("DB_PASS", "test");				// db password
@@ -64,7 +63,7 @@ define("WEEK_START", 0);
 // formats available: "12hr", which displays
 // hours 1-12 with an am/pm, and "24hr" which
 // display hours 00-23 with no am/pm.
-define("TIME_DISPLAY_FORMAT", "12hr");
+define("TIME_DISPLAY_FORMAT", "24hr");
 
 // This directive allows you to specify a number 
 // of hours by which the current time will be 

@@ -1,11 +1,8 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-	<title></title>
-	<?php javaScript() ?>
-	<link rel="stylesheet" type="text/css" href="css/default.css">
-</head>
-<body>
+<?
+if (!isset($auth) || (isset($auth) && ($auth != 1 && $auth != 2))) {
+  header('Location: ../index.php');
+}
+?>
 
 <br><br><br>
 
@@ -32,11 +29,8 @@
 	<?php echo writeCalendar($m, $y); ?></td>
 </tr>
 
-<tr>
+<!--<tr>
 	<td colspan="2" align="center">
 	<?php echo footprint($auth, $m, $y) ?></td>
-</tr>
+</tr>-->
 </table>
-
-</body>
-</html>

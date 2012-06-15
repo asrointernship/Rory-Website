@@ -5,8 +5,8 @@
 //License: of course GPL;-)
 //and sorry for the mess; it's my *first* work in php:))
 
-require("calendar/config.php");
-require("calendar/lang/lang." . LANGUAGE_CODE . ".php");
+require("../config.php");
+require("../lang/lang." . LANGUAGE_CODE . ".php");
 
 $id = $HTTP_GET_VARS['id'];
 

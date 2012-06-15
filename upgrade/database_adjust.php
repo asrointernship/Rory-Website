@@ -1,6 +1,6 @@
 <?
-include("calendar/config.php");
-include("calendar/lang/lang.admin." . LANGUAGE_CODE . ".php");
+include("../config.php");
+include("../lang/lang.admin." . LANGUAGE_CODE . ".php");
 
 mysql_connect(DB_HOST, DB_USER, DB_PASS) or die(mysql_error());
 mysql_select_db(DB_NAME) or die(mysql_error());

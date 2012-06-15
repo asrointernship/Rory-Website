@@ -5,7 +5,7 @@ $lang['login'] = "Inloggen";
 $lang['logout'] = "Uitloggen";
 
 // denied messages
-$lang['accessdenied'] = "Verplicht in te loggen. U bent niet ingelogd. Klik <a href=\"index.php\">hier</a> om terug te keren naar de agenda.";
+$lang['accessdenied'] = "Verplicht in te loggen. U bent niet ingelogd. Klik <a href=\"index.php?nav=calendar\">hier</a> om in te loggen.";
 $lang['popaccessdenied'] = "Toegang geweigerd!!!  Probeer opnieuw voor toegang tot deze pagina.";
 
 // eventform.php
@@ -26,18 +26,18 @@ $lang['missingevent'] = "Fout: gebreurtenis bestaan niet.";
 
 // login.php
 $lang['login'] = "Inloggen";
-$lang['logout'] = "Uiitloggen";
-$lang['logintitle'] = "Agenda inlog pagina";
-$lang['loginheader'] = "Agena inloggen";
+$lang['logout'] = "Uitloggen";
+$lang['logintitle'] = "Inloggen";
+$lang['loginheader'] = "Inloggen";
 $lang['wronglogin'] = "Verkeerd wachtwoord of gebruikersnaam";
 $lang['username'] = "Gebruikersnaam";
 $lang['password'] = "Wachtwoord";
 $lang['accesswarning'] = "Dit is niet mogelijk.";
-$lang['titlemissing'] = "Wees zo goed steken een gebeurtenis titel";
+$lang['titlemissing'] = "Vul een titel in aub.";
 
 // useradmin.php
 $lang['pwblank'] = "Er is geen wachtwoord opgegeven. Vul aub een wachtwoord in.";
-$lang['ulistheader'] = "Agenda Gebruikers";
+$lang['ulistheader'] = "Gebruikers";
 $lang['deleteconf'] = "Weet u het zeker deze gebruiker te verwijderen?";
 $lang['deleteown'] = "Sorry. Het is niet mogelijk uw eigen gebruikersnaam te verwijderen.";
 $lang['adduser'] = "Gebruiker toevoegen";
@@ -79,5 +79,5 @@ $lang['unameinuse'] = "De geselecteerde gebruikersnaam is reeds in gebruik. Kies
 $lang['edituser'] = "Wijzig gebruiker";
 $lang['adduser'] = "Gebruiker toevoegen";
 
-$lang['successfulinstall'] = "Installatie voltooid.  Klik <a href=\"index.php\">hier</a> om de kalender te zien.";
+$lang['successfulinstall'] = "Installatie voltooid.  Klik <a href=\"index.php?nav=calendar\">hier</a> om de kalender te zien.";
 ?>

@@ -1,4 +1,7 @@
 <?php
+if (!isset($auth) || (isset($auth) && ($auth != 1 && $auth != 2))) {
+  header('Location: index.php');
+}
 if (isset($_POST["mededeling"]) && $_POST["mededeling"] != "" && !strstr($_POST["mededeling"], "Mededeling...")) {
   saveMededeling($_POST["mededeling"]);
   $warning = "Mededeling is opgeslagen.";

@@ -1,13 +1,12 @@
 html {
- background-color: #9CF;
+ /*background-color: #9CF;*/
 }
 
 body {
 	width: 700px;
-	height: 100%;
 	margin: auto;
 	margin-top: 0px;
-	background-color: #FFF;
+	/*background-color: #FFF;*/
 	padding: 0px;
 }
 
@@ -21,8 +20,8 @@ body {
 	text-decoration: none;
 	color: #000;
 	font-weight: bold;
-	font-size: 120%;
-	margin: 10px 20px 10px 20px;
+	/*font-size: 100%;*/
+	margin: 10px 10px 10px 10px;
 }
 
 #mededelingContent {
@@ -79,6 +78,7 @@ body {
 	margin: 0 auto;
 	padding: 0 0 0 0;
 	width: 480px;
+	height: 300px;
 }
 
 #canvas
@@ -102,5 +102,6 @@ body {
 
 #options
 {
+	width: 160px;
 	float: left;
 }

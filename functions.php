@@ -1,131 +1,455 @@
 <?php
-function open_connection() {
-    mysql_connect( $host, $user, $pswd) or die('Could not conn');
-    //mysql_select_db($db) or die('Could not select database.');
-    mysql_query("USE ".$db);
+/*******************************************************
+* functions.php -
+*	phpEventCalendar global include file
+*******************************************************/
+
+date_default_timezone_set("Europe/Brussels");
+
+function safe_text ($tekst='', $toegestane_tags='') {
+	$tekst = trim($tekst);
+	return strip_tags($tekst, $toegestane_tags);
 }
 
-function close_connection() {
-    mysql_close();
+function auth($login = '', $passwd = '') 
+{
+	$login = safe_text($login);
+	$passwd = safe_text($passwd);
+
+	session_start();
+	$auth     = 0;
+	$register = false;
+	$authdata = null;
+	
+	if (isset($_SESSION['authdata'])) {
+		$authdata = $_SESSION['authdata'];
+	}
+	
+	# return false if login neither passed to func, nor in session
+	if (empty($login) && empty($authdata['login'])) {
+		return 0;
+	}
+
+	# get login passed to function
+	if (!empty($login)) {
+		$username = $login;
+		$pw       = encryptPassword($passwd);
+		$register = true;
+	} else {
+		$username = $authdata['login'];
+		$pw       = $authdata['password'];
+	}
+	
+	mysql_connect(DB_HOST, DB_USER, DB_PASS) or die(mysql_error());
+	mysql_select_db(DB_NAME) or die(mysql_error());
+	
+	$sql = "
+		SELECT * FROM " . DB_TABLE_PREFIX . "users 
+		WHERE username = '" . $username . "'";
+	$result = mysql_query($sql) or die(mysql_error());
+	$row = mysql_fetch_assoc($result);
+	
+	# validate login, and register session data if appropriate 
+	if ( $pw == $row["password"] ) {
+		$auth = $row['userlevel'];
+
+		if ($register) {
+			$_SESSION['authdata'] = array(
+				'login'     => $row['username'], 
+				'password'  => $row['password'], 
+				'userlevel' => $row['userlevel'], 
+				'uid'       => $row['uid'],
+			);
+		}
+	} else {
+		# if passwords didn't match, delete authdata session data 
+		unset($_SESSION['authdata']);
+	}
+   	return $auth;
 }
 
-/*function empty_table() {
-    mysql_query("DELETE FROM ASRO.layout");
+# ###################################################################
+
+function monthPullDown($month, $montharray)
+{
+	echo "<select name=\"month\">\n";
+
+	$selected[$month - 1] = ' selected="selected"';
+
+	for($i=0;$i < 12; $i++) {
+		$val = $i + 1;
+		$sel = (isset($selected[$i])) ? $selected[$i] : "";
+		echo "	<option value=\"$val\"$sel>$montharray[$i]</option>\n";
+	}
+	echo "</select>\n\n";
 }
 
-function empty_textboxes() {
-    mysql_query("DELETE FROM ASRO.textbox");
-}*/
+# ###################################################################
 
-function insertXy($name, $x, $y) {
-    $r = "";
-    $s = mysql_query("INSERT INTO ASRO.layout (name,x,y) VALUES(\"$name\",$x,$y)") or 
-die("insertXy: ".mysql_error()) ;
-    if ($s) {
-        return "$x - $y";
-    } else {
-        return "fail: $x - $y";
-    }
+function yearPullDown($year)
+{
+	echo "<select name=\"year\">\n";
+
+	$selected[$year] = ' selected="selected"';
+	$years_before_and_after = 3;
+	$start_year = $year - $years_before_and_after;
+	$end_year   = $year + $years_before_and_after;
+
+	for($i=$start_year;$i <= $end_year; $i++) {
+		$sel = (isset($selected[$i])) ? $selected[$i] : "";
+		echo "	<option value=\"$i\"$sel>$i</option>\n";
+	}
+	echo "</select>\n\n";
 }
 
-function getFormName() {
-    $s = mysql_query("SELECT name, layout, textbox FROM ASRO.form ORDER BY name DESC LIMIT 1") or die("getFormName: ".mysql_error());
+# ###################################################################
 
-    return $s;
+function dayPullDown($day)
+{
+	echo "<select name=\"day\">\n";
+
+	$selected[$day] = ' selected="selected"';
+
+	for($i=1;$i <= 31; $i++) {
+		$sel = (isset($selected[$i])) ? $selected[$i] : "";
+		echo "	<option value=\"$i\"$sel>$i</option>\n";
+	}
+	echo "</select>\n\n";
 }
 
-function insertTextboxes($name, $x1, $x2, $y1, $y2, $font) {
-    $r = "";
-    $s = mysql_query("INSERT INTO ASRO.textbox (name,x1,x2,y1,y2,font) VALUES (\"$name\",$x1,$x2,$y1,$y2,$font)")
-     or die ("insertTextboxes: ".mysql_error());
-     if ($s) {
-         return " x1: $x1 /y1: $y1 /x2: $x2 /y2: $y2 /f: $font ";
-     } else {
-         return "fail: x1: $x1 /y1: $y1 /x2: $x2 /y2: $y2 /f: $font ";
-     }
+# ###################################################################
+
+function hourPullDown($hour, $namepre)
+{
+	echo "\n<select name=\"" . $namepre . "_hour\">\n";
+	
+	$selected[$hour] = ' selected="selected"';
+
+	for($i=0;$i <= 12; $i++) {
+		$sel = (isset($selected[$i])) ? $selected[$i] : "";
+		echo "	<option value=\"$i\"$sel>$i</option>\n";
+	}
+	echo "</select>\n\n";
 }
 
-function createForm($name) {
-    open_connection();
-    $s = mysql_query("INSERT INTO ASRO.form (name, active) VALUES (\"$name\", False)")
-     or die ("createForm: ". mysql_error());
-    if ($s) {
-        return "$name";
-    } else {
-        return "fail: $name";
-    }
-    close_connection();
+# ###################################################################
+
+function minPullDown($min, $namepre)
+{
+	echo "\n<select name=\"" . $namepre . "_min\">\n";
+	
+	$selected[$min] = ' selected="selected"';
+
+	for($i=0;$i < 60; $i+=5) {
+		$disp_min = sprintf("%02d", $i);
+		$sel = (isset($selected[$i])) ? $selected[$i] : "";
+		echo "\t<option value=\"$i\"$sel>$disp_min</option>\n";
+	}
+
+	echo "</select>\n\n";
 }
 
-function formAddLayout($name, $layout) {
-    open_connection();
-    $r = "";
-    $s = mysql_query("UPDATE ASRO.form SET layout = \"$layout\" WHERE name = \"$name\"")
-      or die ("formAddLayout: ".mysql_error());
-    if ($s) {
-        return "$name | $layout";
-    } else {
-        return "fail: $name | $layout";
-    }
-    close_connection();
+# ###################################################################
+
+function amPmPullDown($pm, $namepre)
+{
+	$sel = ' selected="selected"';
+	$am  = null;
+	if ($pm) { $pm = $sel; } else { $am = $sel; }
+
+	echo "\n<select name=\"" . $namepre . "_am_pm\">\n";
+	echo "	<option value=\"0\"$am>am</option>\n";
+	echo "	<option value=\"1\"$pm>pm</option>\n";
+	echo "</select>\n\n";
 }
 
-function formAddTextbox($name, $textbox) {
-    open_connection();
-    $r = "";
-    $s = mysql_query("UPDATE ASRO.form SET textbox = \"$textbox\" WHERE name = \"$name\"")
-      or die ("formAddTextbox: ".mysql_error());
-    if ($s) {
-        return "$name | $textbox";
-    } else {
-        return "fail: $name | $textbox";
-    }
-    close_connection();
+# ###################################################################
+
+function javaScript()
+{
+?>
+	<script language="javascript">
+	function submitMonthYear() {
+		document.monthYear.method = "post";
+		document.monthYear.action = 
+			"index.php?month=" + document.monthYear.month.value + 
+			"&year=" + document.monthYear.year.value;
+		document.monthYear.submit();
+	}
+	
+	function postMessage(day, month, year) {
+		eval(
+		"page" + day + " = window.open('eventform.php?d=" + day + "&m=" + 
+		month + "&y=" + year + "', 'postScreen', 'toolbar=0,scrollbars=1," +
+		"location=0,statusbar=0,menubar=0,resizable=1,width=340,height=400');"
+		);
+	}
+	
+	function openPosting(pId) {
+		eval(
+		"page" + pId + " = window.open('eventdisplay.php?id=" + pId + 
+		"', 'mssgDisplay', 'toolbar=0,scrollbars=1,location=0,statusbar=0," +
+		"menubar=0,resizable=1,width=340,height=400');"
+		);
+	}
+	
+	function loginPop(month, year) {
+		eval("logpage = window.open('login.php?month=" + month + "&year=" + 
+		year + "', 'mssgDisplay', 'toolbar=0,scrollbars=1,location=0," +
+		"statusbar=0,menubar=0,resizable=1,width=340,height=400');"
+		);
+	}
+	</script>
+<?php
 }
 
-function getMededelingen() {
-	open_connection();
-	$s = mysql_query("SELECT id, content FROM ASRO.mededelingen ORDER BY id DESC") or die("getMededelingen: ".mysql_error());
-	close_connection();
-    return $s;
+# ###################################################################
+
+function footprint($auth, $m, $y) 
+{
+	global $lang;
+
+	echo "
+	<br><br><span class=\"footprint\">
+	phpEventGallery <span style=\"color: #666\">by ikemcg at </span> 
+	<a href=\"http://www.ikemcg.com/pec\" target=\"new\">
+	ikemcg.com</a><br />\n[ ";
+	
+	if ( $auth == 2 ) {
+		echo "
+		<a href=\"useradmin.php\">" . $lang['adminlnk'] . "</a> |
+		<a href=\"login.php?action=logout&month=$m&year=$y\">" 
+		. $lang['logout'] . "</a>";
+	} elseif ( $auth == 1 ) {
+		echo "
+		<a href=\"useradmin.php?flag=changepw\">" . $lang['changepw'] . "</a> |
+		<a href=\"login.php?action=logout&month=$m&year=$y\">"
+		 . $lang['logout'] . " </a>";
+	} else {
+		echo "<a href=\"javascript:loginPop($m, $y)\">"
+		. $lang['login'] . "</a>";
+	}
+	echo " ]</span>";
 }
 
-function saveMededeling($mededeling) {
-    open_connection();
-    $s = mysql_query("INSERT INTO ASRO.mededelingen (content) VALUES (\"$mededeling\")") or die("saveMededeling: ".mysql_error());
+# ###################################################################
+
+function scrollArrows($m, $y)
+{
+	// set variables for month scrolling
+	$nextyear  = ($m != 12) ? $y : $y + 1;
+	$prevyear  = ($m != 1)  ? $y : $y - 1;
+	$prevmonth = ($m == 1)  ? 12 : $m - 1;
+	$nextmonth = ($m == 12) ? 1  : $m + 1;
+
+	return "
+	<a href=\"index.php?month=" . $prevmonth . "&year=" . $prevyear . "\">
+	<img src=\"images/leftArrow.gif\" border=\"0\"></a>
+	<a href=\"index.php?month=" . $nextmonth . "&year=" . $nextyear . "\">
+	<img src=\"images/rightArrow.gif\" border=\"0\"></a>
+	";
 }
 
-function deleteMededeling($id) {
-	open_connection();
-	$s = mysql_query("DELETE FROM ASRO.mededelingen WHERE id = $id") or die("deleteMededeling: ".mysql_error());
-	close_connection();
-    return $s;
+# ###################################################################
+
+function writeCalendar($month, $year)
+{
+	$str = getDayNameHeader();
+	$eventdata = getEventDataArray($month, $year);
+
+	# get first row position of first day of month.
+	$weekpos = getFirstDayOfMonthPosition($month, $year);
+
+	# get user permission level
+	$auth = (isset($_SESSION['authdata'])) 
+		? $_SESSION['authdata']['userlevel'] 
+		: false;
+
+	# get number of days in month
+	$days = date("t", mktime(0,0,0,$month,1,$year));
+
+	# initialize day variable to zero, unless $weekpos is zero
+	if ($weekpos == 0) $day = 1; else $day = 0;
+	
+	# initialize today's date variables for color change
+	$timestamp = mktime() + CURR_TIME_OFFSET * 3600;
+	$d = date('j', $timestamp); 
+	$m = date('n', $timestamp); 
+	$y = date('Y', $timestamp);
+
+	# lookup for testing whether day is today
+	$today["$y-$m-$d"] = 1;
+
+	# loop writes empty cells until it reaches position of 1st day of 
+	# month ($wPos).  It writes the days, then fills the last row with empty 
+	# cells after last day
+	while($day <= $days) {
+		$str .="<tr>\n";
+		
+		# write row
+		for($i=0;$i < 7; $i++) {
+			# if cell is a day of month
+			if($day > 0 && $day <= $days) {
+				# set css class today if cell represents current date
+				$class = (isset($today["$year-$month-$day"])) ? 'today' : 'day';
+
+				$str .= "
+				<td class=\"{$class}_cell\" valign=\"top\">
+				<span class=\"day_number\">\n";
+				
+				if ($auth) {
+					$str .= "
+					<a href=\"javascript: postMessage($day, $month, $year)\">
+					$day</a>";
+				} else {
+					$str .= "$day";
+				}	
+				$str .= "</span><br>";
+				
+				if (isset($eventdata[$day]["title"])) {
+					// enforce title limit
+					$eventcount = count($eventdata[$day]["title"]);
+	
+					if (MAX_TITLES_DISPLAYED < $eventcount) {
+						$eventcount = MAX_TITLES_DISPLAYED;
+					}
+					
+					// write title link if day's postings 
+					for($j=0;$j < $eventcount;$j++) {
+						$str .= "
+						<span class=\"title_txt\">
+						-<a href=\"javascript:openPosting("
+						. $eventdata[$day]["id"][$j] . ")\">"
+						. $eventdata[$day]["title"][$j] . "</a></span>"
+						. $eventdata[$day]["timestr"][$j];
+					}
+				}
+
+				$str .= "</td>\n";
+				$day++;
+			} elseif($day == 0)  {
+     			$str .= "
+				<td class=\"empty_day_cell\" valign=\"top\">&nbsp;</td>\n";
+				$weekpos--;
+				if ($weekpos == 0) $day++;
+     		} else {
+				$str .= "
+				<td class=\"empty_day_cell\" valign=\"top\">&nbsp;</td>\n";
+			}
+     	}
+		$str .= "</tr>\n\n";
+	}
+	$str .= "</table>\n\n";
+	return $str;
 }
 
-function getOpeningstijden() {
-    open_connection();
-    $s = mysql_query("SELECT dag, openu, openm, geslotenu, geslotenm FROM ASRO.openingstijden") or die("getOpeningstijden: ".mysql_error());
-    close_connection();
-    return $s;
+# ###################################################################
+
+function getDayNameHeader()
+{
+	global $lang;
+
+	// adjust day name order if weekstart not Sunday
+	if (WEEK_START != 0) {
+		for($i=0; $i < WEEK_START; $i++) {
+			$tempday = array_shift($lang['abrvdays']);
+			array_push($lang['abrvdays'], $tempday);
+		}
+	}
+
+	$s = "<table cellpadding=\"1\" cellspacing=\"1\" border=\"0\">\n<tr>\n";
+
+	foreach($lang['abrvdays'] as $day) {
+		$s .= "\t<td class=\"column_header\">&nbsp;$day</td>\n";
+	}
+
+	$s .= "</tr>\n\n";
+	return $s;
 }
 
-function deleteOpeningstijden() {
-    open_connection();
-    $s = mysql_query("DELETE FROM ASRO.openingstijden") or die("deleteOpeningstijden: ".mysql_error());
-    close_connection();
+# ###################################################################
+
+function getEventDataArray($month, $year)
+{
+	$eventdata = null;
+	mysql_connect(DB_HOST, DB_USER, DB_PASS) or die(mysql_error());
+	mysql_select_db(DB_NAME) or die(mysql_error());
+	
+	$sql = "SELECT id, d, title, start_time, end_time, ";
+	
+	if (TIME_DISPLAY_FORMAT == "12hr") {
+		$sql .= "TIME_FORMAT(start_time, '%l:%i%p') AS stime, ";
+		$sql .= "TIME_FORMAT(end_time, '%l:%i%p') AS etime ";
+	} elseif (TIME_DISPLAY_FORMAT == "24hr") {
+		$sql .= "TIME_FORMAT(start_time, '%H:%i') AS stime, ";
+		$sql .= "TIME_FORMAT(end_time, '%H:%i') AS etime ";
+	} else {
+		echo "Bad time display format, check your configuration file.";
+	}
+	
+	$sql .= "
+		FROM " . DB_TABLE_PREFIX . "mssgs WHERE m = $month AND y = $year
+		ORDER BY start_time";
+	
+	$result = mysql_query($sql) or die(mysql_error());
+	
+	while($row = mysql_fetch_assoc($result)) {
+		$day = $row["d"];
+		$eventdata[$day]["id"][] = $row["id"];
+
+		# set title string; limit char length and append ellipsis if necessary
+		$title = stripslashes($row["title"]);
+		$eventdata[$day]["title"][] = (strlen($title) > TITLE_CHAR_LIMIT)
+			? substr($title, 0, TITLE_CHAR_LIMIT) . '...'
+			: $title; 
+		
+		# set time string
+		if (!($row["start_time"] == "55:55:55" 
+			&& $row["end_time"] == "55:55:55")) {
+			$starttime 
+				= ($row["start_time"] == "55:55:55") ? "- -" : $row["stime"];
+			$endtime 
+				= ($row["end_time"] == "55:55:55") ? "- -" : $row["etime"];
+			
+			$timestr = "
+			<div align=\"right\" class=\"time_str\">
+			($starttime - $endtime)&nbsp;</div>\n";
+		} else {
+			$timestr = "<br />";
+		}
+		$eventdata[$day]["timestr"][] = $timestr;
+	}
+	return $eventdata;
 }
 
-function fillOpeningstijden($tijden) {
-    open_connection();
-    foreach($tijden as $dag => $t) {
-        $s = mysql_query("INSERT INTO ASRO.openingstijden (dag, openu, openm, geslotenu, geslotenm) VALUES (\"$dag\", $t[0], $t[1], $t[2], $t[3])") or die("fillOpeningstijden: ".mysql_error());
-    }
+# ###################################################################
+
+function getFirstDayOfMonthPosition($month, $year)
+{
+	$weekpos = date("w", mktime(0,0,0,$month,1,$year));
+
+	// adjust position if weekstart not Sunday
+	if (WEEK_START != 0) {
+		if ($weekpos < WEEK_START) {
+			$weekpos = $weekpos + 7 - WEEK_START;
+		} else {
+			$weekpos = $weekpos - WEEK_START;
+		}
+	}
+	return $weekpos;
 }
 
-function zoTerug($bool) {
-    open_connection();
-    $s = mysql_query("UPDATE ASRO.pauze SET status = ".$bool) or die ("zoTerug: ".mysql_error());
-    close_connection();
-    return $s;
+# ###################################################################
+
+function encryptPassword($oldpassword) {
+	if ($oldpassword != "" && $oldpassword != null) {
+		$salt1 = "3$tdsalkksI8&DFr";
+		$salt2 = "128FlkEq8*lc@qas";
+		$encrypted = $salt1.$oldpassword.$salt2;
+		return md5($encrypted);
+	} else {
+		return "";
+	}
 }
+
 ?>

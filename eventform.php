@@ -1,7 +1,7 @@
 <?php
-require("calendar/config.php");
-require("calendar/lang/lang.admin." . LANGUAGE_CODE . ".php");
-require("calendar/functions.php");
+require("config.php");
+require("./lang/lang.admin." . LANGUAGE_CODE . ".php");
+require("functions.php");
 
 
 $auth = auth();

@@ -1,7 +1,7 @@
 <?php
-require("calendar/config.php");
-require("calendar/lang/lang." . LANGUAGE_CODE . ".php");
-require("calendar/functions.php");
+require_once("config.php");
+require_once("./lang/lang." . LANGUAGE_CODE . ".php");
+require_once("functions.php");
 
 $auth	= auth();
 $id 	= $_GET['id'];

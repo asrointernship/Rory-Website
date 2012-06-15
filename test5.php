@@ -6,90 +6,66 @@ $user = "test_user";
 $pswd = "test";
 $db = "ASRO";
 
-include('functions.php');
+include('functionsOnthaal.php');
 
-/*function writeNrToArduino($nr){
+//$names = getFormName();
 
-	$serial = new phpSerial();
-	$serial->deviceSet("/dev/ttyACM0");
-	$serial->confBaudRate(115200);
-	//$serial->confCharacterLength(8);
+if (isset($_POST["name"])) {
+    $form_name = json_decode(str_replace("\\", "", $_POST['name']), true);
+    $layout_name = "layout".$_POST["name"];
+    $textbox_name = "textbox".$_POST["name"];
 
-	$serial->deviceOpen();
-	$serial->sendMessage(chr($nr), 0);
-	$serial->deviceClose();
-}*/
+    /*while ($row = mysql_fetch_assoc($names)) {
+        //var_dump($row);
+        $layout_name = $row["layout"];
+        $textbox_name = $row["texbox"];
+    }*/
 
-/*if (isset($_GET["text"])) {
-	writeToArduino($_GET["text"]);
-}
-if (isset($_GET["reset"])) {
-	writeToArduino(chr(1));
-}*/
+    /*$layout_name = "layout". (intval($temp)+1);
+    $textbox_name = "textbox". (intval($temp)+1);*/
 
-$names = getFormName();
+    createForm($form_name);
 
-$form_name = "form0";
-$layout_name = "layout0";
-$textbox_name = "textbox0";
+    //echo $form_name;
 
-while ($row = mysql_fetch_assoc($names)) {
-    //var_dump($row);
-    $form_name = $row["name"];
-    $layout_name = $row["layout"];
-    $textbox_name = $row["texbox"];
-}
+    if (isset($_POST['textbox'])) {
+        $textbox = json_decode(str_replace("\\", "", $_POST['textbox']), true);
 
-$temp = substr($form_name, -1);
-$form_name = "form". (intval($temp)+1);
-$layout_name = "layout". (intval($temp)+1);
-$textbox_name = "textbox". (intval($temp)+1);
+        echo "TEXTBOX: ".count($textbox);
 
-createForm($form_name);
-
-//echo $form_name;
-
-if (isset($_POST['textbox'])) {
-    $textbox = json_decode(str_replace("\\", "", $_POST['textbox']), true);
-
-    echo "TEXTBOX: ".count($textbox);
-
-    if (count($textbox) > 0) {
-        echo " TextLoop ";
-        formAddTextbox($form_name, $textbox_name);
-        //empty_textboxes();
-        open_connection();
-        foreach($textbox as $t) {
-            echo insertTextboxes($textbox_name, $t['x1'], $t['x2'], $t['y1'], $t['y2'], $t['textFont']);
+        if (count($textbox) > 0) {
+            echo " TextLoop ";
+            formAddTextbox($form_name, $textbox_name);
+            //empty_textboxes();
+            open_connection();
+            foreach($textbox as $t) {
+                echo insertTextboxes($textbox_name, $t['x1'], $t['x2'], $t['y1'], $t['y2'], $t['textFont']);
+            }
+            close_connection();
         }
-        close_connection();
+    }
+
+    if (isset($_POST['coords'])) {
+    	//$data = str_replace("\\", "", $_REQUEST["test"]);
+        $coords = json_decode(str_replace("\\", "", $_POST['coords']), true);
+
+        echo "COORDS: ".count($coords);
+
+        if (count($coords) > 0) {
+            //$string;
+            //empty_table();
+            formAddLayout($form_name, $layout_name);
+            open_connection();
+            foreach($coords as $t) {
+        	echo insertXy($layout_name, $t['x'], $t['y']);
+            	//writeNrToArduino($t['x']);
+            	//writeNrToArduino($t['y']);
+            	//$string .= chr($t['x']);
+            }
+            close_connection();
+            //echo $string;
+        }
+        //exec('python ~/py/sql.py');
     }
 }
-
-if (isset($_POST['coords'])) {
-	//$data = str_replace("\\", "", $_REQUEST["test"]);
-    $coords = json_decode(str_replace("\\", "", $_POST['coords']), true);
-
-    echo "COORDS: ".count($coords);
-
-    if (count($coords) > 0) {
-        //$string;
-        //empty_table();
-        formAddLayout($form_name, $layout_name);
-        open_connection();
-        foreach($coords as $t) {
-    	echo insertXy($layout_name, $t['x'], $t['y']);
-        	//writeNrToArduino($t['x']);
-        	//writeNrToArduino($t['y']);
-        	//$string .= chr($t['x']);
-        }
-        close_connection();
-        //echo $string;
-    }
-    //exec('python ~/py/sql.py');
-}
-
-/*if (isset($_POST['reset'])) {
-	writeNrToArduino(241);
-}*/
 ?>

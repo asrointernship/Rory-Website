@@ -1,7 +1,7 @@
 <?php
-require("calendar/config.php");
-require("calendar/lang/lang.admin." . LANGUAGE_CODE . ".php");
-require("calendar/functions.php");
+require_once("config.php");
+require_once("./lang/lang.admin." . LANGUAGE_CODE . ".php");
+require_once("functions.php");
 
 $action = 'show_form';
 
@@ -17,10 +17,11 @@ $y 		= (int) $_GET['year'];
 # if login, and auth returns true, then refresh month view, and close window
 if ($action == "login" 
 	&& auth($_POST['username'], $_POST['password']) ) {
-	echo "<script language=\"JavaScript\">";
+	/*echo "<script language=\"JavaScript\">";
 	echo "opener.location = \"index.php?month=$m&year=$y\";";
 	echo "window.setTimeout('window.close()', 500);";
-	echo "</script>";
+	echo "</script>";*/
+	header('Location: index.php');
 } elseif ($action == "logout") {
 	session_start();
 	session_destroy();
@@ -62,12 +63,12 @@ if ($action == "login"
 			<tr>
 				<td nowrap valign="top" align="right" nowrap>
 				<span class="login_label"><?php echo $lang['username']?></span></td>
-				<td><input type="text" name="username" size="30" maxlength="30"></td>
+				<td><input type="text" name="username" size="29" maxlength="15"></td>
 			</tr>
 			<tr>
 				<td nowrap valign="top" align="right" nowrap>
 				<span class="login_label"><?php echo $lang['password']?></span></td>
-				<td><input type="password" name="password" size="30" maxlength="30"></td>
+				<td><input type="password" name="password" size="29" maxlength="15"></td>
 			</tr>
 			<tr><td colspan="2" align="right"><input type="submit" value="<?php echo $lang['login']?>"><td><tr>
 	</form>

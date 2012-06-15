@@ -1,8 +1,8 @@
 <?php
 
-require("calendar/config.php");
-require("calendar/lang/lang.admin." . LANGUAGE_CODE . ".php");
-require("calendar/functions.php");
+require("config.php");
+require("./lang/lang.admin." . LANGUAGE_CODE . ".php");
+include("functions.php");
 
 mysql_connect(DB_HOST, DB_USER, DB_PASS) or die(mysql_error());
 mysql_select_db(DB_NAME) or die(mysql_error());
@@ -25,12 +25,11 @@ mysql_query("create index y on " . DB_TABLE_PREFIX . "mssgs (y)");
 
 mysql_query("CREATE TABLE " . DB_TABLE_PREFIX . "users (
   uid smallint(6) NOT NULL auto_increment,
-  username char(30) NOT NULL default '',
+  username char(15) NOT NULL default '',
   password char(32) NOT NULL default '',
-  fname char(30) NOT NULL default '',
+  fname char(20) NOT NULL default '',
   lname char(30) NOT NULL default '0',
   userlevel tinyint(2) NOT NULL default '0',
-  email char(40) default NULL,
   PRIMARY KEY  (uid)
 ) TYPE=MyISAM") or die(mysql_error());
 

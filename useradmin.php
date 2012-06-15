@@ -1,7 +1,7 @@
 <?php
-require("calendar/config.php");
-require("calendar/lang/lang.admin." . LANGUAGE_CODE . ".php");
-require("calendar/functions.php");
+require_once("config.php");
+require_once("./lang/lang.admin." . LANGUAGE_CODE . ".php");
+require_once("functions.php");
 
 $flag = (isset($_GET['flag'])) ? $_GET['flag'] : null;
 $auth = auth();
@@ -64,7 +64,7 @@ function editUserForm($mode, $id="", $error="")
 		mysql_connect(DB_HOST, DB_USER, DB_PASS) or die(mysql_error());
 		mysql_select_db(DB_NAME) or die(mysql_error());
 		
-		$sql = "SELECT username, password, fname, lname, userlevel, email ";
+		$sql = "SELECT username, password, fname, lname, userlevel ";
 		$sql .= "FROM " . DB_TABLE_PREFIX . "users WHERE uid=" . $id;
 		
 		$result = mysql_query($sql) or die(mysql_error());
@@ -75,7 +75,6 @@ function editUserForm($mode, $id="", $error="")
 		$fname		= $row[2];
 		$lname		= $row[3];
 		$userlevel	= $row[4];
-		$email		= $row[5];
 		$admin      = ($userlevel == 2) ? "selected" : null;
 		$header 	= $lang['edituser'];
 		$formaction = "update";
@@ -94,8 +93,6 @@ function editUserForm($mode, $id="", $error="")
 			? $_POST['lname'] : null;
 		$userlevel 	= (isset($_POST['userlevel'])) 
 			? $_POST['userlevel'] : null;
-		$email		= (isset($_POST['email'])) 
-			? $_POST['email'] : null;
 		$header 	= $lang['adduser'];
 		$formaction = "insert";
 		$unameinput = "<input type=\"text\" name=\"username\" size=\"29\" maxlength=\"20\" value=\"" . $username . "\">";
@@ -115,7 +112,6 @@ function editUserForm($mode, $id="", $error="")
 			var str = "";
 			if (f.fname.value == "") { str += "\n<?php echo $lang['fnameblank']?>"; }
 			if (f.lname.value == "") { str += "\n<?php echo $lang['lnameblank']?>"; }
-			if (f.email.value == "") { str += "\n<?php echo $lang['emailblank']?>"; }
 			if (un == "") { str += "\n<?php echo $lang['unameblank']?>"; }
 			if (un.length < 4) { str += "\n<?php echo $lang['unamelength']?>"; }
 			if (regex.test(un)) { str += "\n<?php echo $lang['unameillegal']?>"; }
@@ -126,7 +122,7 @@ function editUserForm($mode, $id="", $error="")
 			
 			if (str == "") {
 				f.method = "post";
-				f.action = "useradmin.php?flag=<?php echo $formaction ?>";
+				f.action = "index.php?nav=useradmin&flag=<?php echo $formaction ?>";
 				f.submit();
 			} else {
 				alert(str);
@@ -154,11 +150,11 @@ function editUserForm($mode, $id="", $error="")
 	</tr>
 	<tr>
 		<td align="right"><span class="edit_user_label"><?php echo $lang['password']?>:</span></td>
-		<td><input type="password" name="pw" size="30" maxlength="30" value="<?php echo $password?>"></td>
+		<td><input type="password" name="pw" size="29" maxlength="20" value="<?php echo $password?>"></td>
 	</tr>
 	<tr>
 		<td align="right"><span class="edit_user_label"><?php echo $lang['pwconfirm']?>:</span></td>
-		<td><input type="password" name="pwconfirm" size="30" maxlength="30" value="<?php echo $password?>"></td>
+		<td><input type="password" name="pwconfirm" size="29" maxlength="20" value="<?php echo $password?>"></td>
 	</tr>
 	<tr>
 		<td align="right"><span class="edit_user_label"><?php echo $lang['userlevel']?>:</span></td>
@@ -170,21 +166,17 @@ function editUserForm($mode, $id="", $error="")
 	</tr>
 	<tr>
 		<td align="right"><span class="edit_user_label"><?php echo $lang['fname']?>:</span></td>
-		<td><input type="text" name="fname" size="30" maxlength="30" value="<?php echo $fname?>"></td>
+		<td><input type="text" name="fname" size="29" maxlength="20" value="<?php echo $fname?>"></td>
 	</tr>
 	<tr>
 		<td align="right"><span class="edit_user_label"><?php echo $lang['lname']?>:</span></td>
-		<td><input disable type="text" name="lname" size="30" maxlength="30" value="<?php echo $lname?>"></td>
-	</tr>
-	<tr>
-		<td align="right"><span class="edit_user_label"><?php echo $lang['email']?>:</span></td>
-		<td><input type="text" name="email" size="30" maxlength="40" value="<?php echo $email?>"></td>
+		<td><input disable type="text" name="lname" size="29" maxlength="30" value="<?php echo $lname?>"></td>
 	</tr>
 
 	<tr><td><img src="images/clear.gif" width="1" height="7"></td></tr>
 	<tr>
 		<td colspan="2" align="right"><input type="submit" value="<?php echo $mode?> User">
-		&nbsp;	<input type="button" value="cancel" onClick="location.replace('useradmin.php');">
+		&nbsp;	<input type="button" value="cancel" onClick="location.replace('index.php?nav=useradmin');">
 		</td>
 	</tr>
 	</table>
@@ -201,7 +193,6 @@ function insertNewUser()
 	$ulevel = $_POST['userlevel'];
 	$fname 	= $_POST['fname'];
 	$lname 	= $_POST['lname'];
-	$email 	= $_POST['email'];
 	
 	mysql_connect(DB_HOST, DB_USER, DB_PASS) or die(mysql_error());
 	mysql_select_db(DB_NAME) or die(mysql_error());
@@ -216,10 +207,11 @@ function insertNewUser()
 	} else {
 		$sql = "INSERT INTO " . DB_TABLE_PREFIX . "users SET ";
 		$sql .= "username='$uname', password='$pw', fname='$fname', lname='$lname', ";
-		$sql .= "userlevel='$ulevel', email='$email'";
+		$sql .= "userlevel='$ulevel'";
 		mysql_query($sql) or die(mysql_error());
 		
-		header("location:useradmin.php");
+		echo "Gebruiker toegevoegd klik <a href='index.php?nav=useradmin'>hier</a> om terug te gaan";
+		//header("location:index.php?nav=useradmin");
 	}
 }
 
@@ -230,19 +222,19 @@ function updateExistingUser()
 	$ulevel	= $_POST['userlevel'];
 	$fname 	= $_POST['fname'];
 	$lname	= $_POST['lname'];
-	$email	= $_POST['email'];
 	
 	mysql_connect(DB_HOST, DB_USER, DB_PASS) or die(mysql_error());
 	mysql_select_db(DB_NAME) or die(mysql_error());
 	
 	$sql = "UPDATE " . DB_TABLE_PREFIX . "users SET password='$pw', fname='$fname', ";
-	$sql .= "lname='$lname', userlevel='$ulevel', email='$email' WHERE username='$uname'";
+	$sql .= "lname='$lname', userlevel='$ulevel' WHERE username='$uname'";
 	mysql_query($sql) or die(mysql_error());
 	
 	if ( $uname==$_SESSION['authdata']['login'] )
 		$_SESSION['authdata']['password'] = $pw;
 	
-	header("location:useradmin.php");
+	echo "Gebruiker aangepast klik <a href='index.php?nav=useradmin'>hier</a> om terug te gaan";
+	//header("location:index.php?nav=useradmin");
 }
 
 function deleteUser($id)
@@ -257,7 +249,8 @@ function deleteUser($id)
 		mysql_query($sql) or die(mysql_error());
 	}
 	
-	header("location:useradmin.php");
+	echo "Gebruiker verwijdert klik <a href='index.php?nav=useradmin'>hier</a> om terug te gaan";
+	//header("location:index.php?nav=useradmin");
 }
 
 function userList()
@@ -275,7 +268,7 @@ function userList()
 				alert("<?php echo $lang['deleteown']?>");
 				return;
 			} else if (confirm(msg)) {
-				location.replace("useradmin.php?flag=delete&id=" + uid);
+				location.replace("index.php?nav=useradmin&flag=delete&id=" + uid);
 			} else {
 				return;
 			}
@@ -287,7 +280,7 @@ function userList()
 	<table cellpadding="0" cellspacing="0" border="0" width="600">
 	<tr>
 		<td><span class="user_list_header"><?php echo $lang['ulistheader']?></span></td>
-		<td align="right" valign="bottom"><span class="user_list_options">[ <a href="useradmin.php?flag=add"><?php echo $lang['adduser']?></a> | <a href="index.php"><?php echo $lang['return']?></a> ]</span></td>
+		<td align="right" valign="bottom"><span class="user_list_options">[ <a href="index.php?nav=useradmin&flag=add"><?php echo $lang['adduser']?></a> | <a href="index.php"><?php echo $lang['return']?></a> ]</span></td>
 	</tr>
 	<tr><td><img src="images/clear.gif" width="1" height="5"></td></tr>
 	</table>
@@ -299,7 +292,6 @@ function userList()
 	<tr bgcolor="#666666">
 		<td><span class="user_table_col_label"><?php echo $lang['username']?></span></td>
 		<td><span class="user_table_col_label"><?php echo $lang['name']?></span></td>
-		<td><span class="user_table_col_label"><?php echo $lang['email']?></span></td>
 		<td><span class="user_table_col_label"><?php echo $lang['userlevel']?></span></td>
 		<td><span class="user_table_col_label"><?php echo $lang['edit']?></span></td>
 		<td><span class="user_table_col_label"><?php echo $lang['delete']?></span></td>
@@ -320,9 +312,9 @@ function userList()
 		echo "<tr bgcolor=\"$bgcolor\">\n";
 		echo "	<td><span class=\"user_table_txt\">" . $row[1] . "</span></td>\n";
 		echo "	<td><span class=\"user_table_txt\">" . $row[3] . " " . $row[4] . "</span></td>\n";
-		echo "	<td><span class=\"user_table_txt\">" . $row[6] . "</span></td>\n";
+		//echo "	<td><span class=\"user_table_txt\">" . $row[6] . "</span></td>\n";
 		echo "	<td><span class=\"user_table_txt\">" . $userlevel . "</span></td>\n";
-		echo "	<td><span class=\"user_table_txt\"><a href=\"useradmin.php?flag=edit&id=" . $row[0] . "\">" . $lang['edit'] . "</a></span></td>\n";
+		echo "	<td><span class=\"user_table_txt\"><a href=\"index.php?nav=useradmin&flag=edit&id=" . $row[0] . "\">" . $lang['edit'] . "</a></span></td>\n";
 		echo "	<td><span class=\"user_table_txt\"><a href=\"#\" onClick=\"deleteConfirm('" . $row[1] . "', '" . $row[0] . "');\">" . $lang['delete'] . "</a></span></td>\n";
 		echo "</tr>\n";
 	
@@ -357,7 +349,7 @@ function changePW($flag)
 			
 			if (str == "") {
 				f.method = "post";
-				f.action = "useradmin.php?flag=updatepw";
+				f.action = "index.php?nav=useradmin&flag=updatepw";
 				f.submit();
 			} else {
 				alert(str);

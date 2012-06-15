@@ -165,6 +165,13 @@ function textboxOptions() {
   div1.id = "sliderX";
   var p1 = document.createElement("p");
   p1.appendChild(document.createTextNode("X: 0 "));
+  var text1 = document.createElement("input");
+  text1.setAttribute("type", "text");
+  text1.setAttribute("id", "textX");
+  text1.setAttribute("onkeyup", "document.getElementById('slideX').value = this.value * 2; textMoveX()");
+  text1.setAttribute("size", "4");
+  text1.value = 0;
+  p1.appendChild(text1);
   p1.appendChild(document.createElement("br"));
   var slider1 = document.createElement("input");
   slider1.type = "range";
@@ -181,6 +188,13 @@ function textboxOptions() {
   div2.id = "sliderY";
   var p2 = document.createElement("p");
   p2.appendChild(document.createTextNode("Y: 0 "));
+  var text2 = document.createElement("input");
+  text2.setAttribute("type", "text");
+  text2.setAttribute("id", "textY");
+  text2.setAttribute("onkeyup", "document.getElementById('slideY').value = this.value * 2; textMoveY()");
+  text2.setAttribute("size", "4");
+  text2.value = 0;
+  p2.appendChild(text2);
   p2.appendChild(document.createElement("br"));
   var slider2 = document.createElement("input");
   slider2.type = "range";
@@ -197,6 +211,13 @@ function textboxOptions() {
   div3.id = "sliderL";
   var p3 = document.createElement("p");
   p3.appendChild(document.createTextNode("length: 0 "));
+  var text3 = document.createElement("input");
+  text3.setAttribute("type", "text");
+  text3.setAttribute("id", "textL");
+  text3.setAttribute("onkeyup", "document.getElementById('slideL').value = this.value * 2; textLength()");
+  text3.setAttribute("size", "4");
+  text3.value = 0;
+  p3.appendChild(text3);
   p3.appendChild(document.createElement("br"));
   var slider3 = document.createElement("input");
   slider3.type = "range";
@@ -213,6 +234,13 @@ function textboxOptions() {
   div4.id = "sliderH";
   var p4 = document.createElement("p");
   p4.appendChild(document.createTextNode("height: 0 "));
+  var text4 = document.createElement("input");
+  text4.setAttribute("type", "text");
+  text4.setAttribute("id", "textH");
+  text4.setAttribute("onkeyup", "document.getElementById('slideH').value = this.value * 2; textHeight()");
+  text4.setAttribute("size", "4");
+  text4.value = 0;
+  p4.appendChild(text4);
   p4.appendChild(document.createElement("br"));
   var slider4 = document.createElement("input");
   slider4.type = "range";
@@ -250,7 +278,7 @@ function textboxOptions() {
 
 function changeTextFont() {
   var fontbox = document.getElementById("fontbox");
-  font = fontbox.options[fontbox.selectedIndex].value;
+  textFont = fontbox.options[fontbox.selectedIndex].value;
   setTextFont();
 }
 
@@ -668,17 +696,19 @@ function transmit()
     tctx.clearRect(0, 0, canvas.width, canvas.height);
     container.removeChild(tempCanvas);
     alert(JSON.stringify(ajaxData));
-    jQuery_send_data(JSON.stringify(ajaxData.coords), JSON.stringify(ajaxData.textbox));
+    jQuery_send_data(JSON.stringify(document.getElementById("formName").value), JSON.stringify(ajaxData.coords), JSON.stringify(ajaxData.textbox));
+    alert("Done.");
   }
 }
 
-function jQuery_send_data(coords, textbox) {
+function jQuery_send_data(name, coords, textbox) {
 $.ajax({
     type: "POST",
     url: "/final/test5.php",
     dataType: "json",
     traditional: true,
     data: {
+      name: name,
       coords: coords,
       textbox: textbox,
     },
